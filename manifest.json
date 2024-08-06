@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "velog to github extension",
+    "version": "1.0",
+    "description": "Automatically commit Velog posts to Github.",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "identity",
+        "scripting"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup/popup.html"
+    }
+}
