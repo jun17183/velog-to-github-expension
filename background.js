@@ -8,13 +8,23 @@ const getAuthURL = () => {
 };
 
 const fetchAccessToken = (code) => {
+  console.log('fetchAccessToken')
+
   return fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ code: code })
-  }).then(response => response.json());
+    body: JSON.stringify({ 
+      // 여기에 client id, secret 등등 넣어야 함. 하지만 secret은 노출되면 안되기에 서버에서 관리하는 편이 좋음.
+      // 그래서 서버를 결국 만드는 것이 정답인 것 같다.
+      // 그전에 지금까지 과정을 블로그에 남기기
+      code: code 
+    })
+  }).then(response => {
+    console.log(response);
+    return response.json();
+  });
 };
 
 const checkToken = (token) => {
@@ -85,11 +95,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else if (redirect_url) {
         const url = new URL(redirect_url);
         const code = url.searchParams.get('code');
+
+        console.log(code);
+
         if (code) {
           fetchAccessToken(code).then(data => {
             const token = data.access_token;
+
+            console.log(token)
+
             if (token) {
               storeToken(token).then(() => {
+                getToken().then((token) => console.log(token));
+
                 sendResponse({ status: 'repo_url' });
               });
             } else {
