@@ -1,18 +1,43 @@
 {
-    "manifest_version": 3,
-    "name": "velog to github extension",
-    "version": "1.0",
-    "description": "Automatically commit Velog posts to Github.",
-    "permissions": [
-        "activeTab",
-        "storage",
-        "identity",
-        "scripting"
-    ],
-    "background": {
-        "service_worker": "background.js"
-    },
-    "action": {
-        "default_popup": "popup/popup.html"
+  "manifest_version": 3,
+  "name": "velog to github",
+  "version": "1.0",
+  "description": "Automatically commit Velog posts to Github.",
+  "permissions": [
+    "storage",
+    "identity",
+    "activeTab",
+    "tabs"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "images/logo.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://velog.io/*"
+      ],
+      "js": [
+        "content.js"
+      ]
     }
+  ],
+  "host_permissions": [
+    "https://api.github.com/*",
+    "https://github.com/*"
+  ],
+  "oauth2": {
+    "client_id": "Ov23liVjZX04G4iRWxie",
+    "scopes": [
+      "repo",
+      "user"
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
 }

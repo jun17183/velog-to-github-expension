@@ -1,0 +1,34 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.hidden {
+  display: none;
+}
+
+.container {
+
+}
+
+#loginBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  width: 200px;
+  padding: 10px;
+
+}
+
+#loginBox .github_icon {
+  width: 80px;
+}
+
+#loginBox #login {
+  width: 200px;
+  padding: 3px;
+  background-color: rgb(32, 32, 32);
+  color: white;
+  cursor: pointer;
+} 
+
