@@ -1,65 +1,88 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.querySelector('#container');
-
-  const showLoadingUI = () => {
-    container.innerHTML = `
+const UI = {
+  showLoadingUI: () => {
+    document.querySelector('#container').innerHTML = `
 			<div id="loadingBox">
 				Loading...
 			</div>
 		`;
-  };
+  },
 
-  const showLoginUI = () => {
-    container.innerHTML = `
+  showLoginUI: () => {
+    document.querySelector('#container').innerHTML = `
 			<div id="loginBox">
 				<img class="github_icon" src="/images/github_icon.png" />
 				<button id="login">Login with Github</button>
 			</div>
 		`;
-  };
+  },
 
-  const showRepositoryURLUI = () => {
-    container.innerHTML = `
+  showRepositoryURLUI: () => {
+    document.querySelector('#container').innerHTML = `
 			<div id="repositoryBox">
 				<p>Please enter your GitHub repository URL:</p>
 				<input type="text" id="repo-url" placeholder="https://github.com/user/repo">
 				<button id="save-repo-url">Save</button>
 			</div>
 		`;
-  };
+  },
 
-  const showRunningUI = () => {
-    container.innerHTML = `
+  showRunningUI: () => {
+    document.querySelector('#container').innerHTML = `
 			<div id="runningBox">
 				Running...
 			</div>
 		`;
-  };
+  },
 
-  const showErrorUI = (errorMessage) => {
-    container.innerHTML = `
+  showErrorUI: (errorMessage) => {
+    document.querySelector('#container').innerHTML = `
 			<div id="errorBox">
 				Error: ${errorMessage}
 			</div>
 		`;
-  };
+  },
+};
 
-  chrome.runtime.sendMessage({ type: 'check_status' }, (response) => {
-    if (response.status === 'login') {
+const handleUI = (status) => {
+  const { showLoadingUI, showLoginUI, showRepositoryURLUI, showRunningUI, showErrorUI } = UI;
+
+  switch (status) {
+    case 'login':
       showLoginUI();
-      document.getElementById('login').addEventListener('click', () => {
-        chrome.runtime.sendMessage({ type: 'login' });
-      });
-    } else if (response.status === 'repo_url') {
+      document.querySelector('#login').addEventListener('click', login);
+      break;
+
+    case 'repo_url':
       showRepositoryURLUI();
-      document.querySelector('#save-repo-url').addEventListener('click', () => {
-        const url = document.querySelector('#repo-url').value;
-        chrome.runtime.sendMessage({ type: 'save_repo_url', url });
-      });
-    } else if (response.status === 'running') {
+      document.querySelector('#save-repo-url').addEventListener('click', saveRepoUrl);
+      break;
+
+    case 'running':
       showRunningUI();
-    } else if (response.status === 'error') {
-      showErrorUI(response.message);
-    }
-  });
+      break;
+
+    case 'error':
+      showErrorUI();
+      break;
+  }
+};
+
+const checkStatus = () => {
+  chrome.runtime.sendMessage({ type: 'check_status' }, (response) => handleUI(response.status));
+};
+
+const login = () => {
+  chrome.runtime.sendMessage({ type: 'login' }, checkStatus);
+};
+
+const saveRepoUrl = () => {
+  const url = document.querySelector('#repo-url').value;
+  chrome.runtime.sendMessage({ type: 'save_repo_url', url }, checkStatus);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkStatus();
 });
+
+window.addEventListener('popstate', checkStatus);
+window.addEventListener('hashchange', checkStatus);

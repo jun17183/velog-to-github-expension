@@ -28,7 +28,8 @@
   ],
   "host_permissions": [
     "https://api.github.com/*",
-    "https://github.com/*"
+    "https://github.com/*",
+    "http://localhost/*"
   ],
   "oauth2": {
     "client_id": "Ov23liVjZX04G4iRWxie",
