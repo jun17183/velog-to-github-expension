@@ -1,3 +1,5 @@
+// https://v2.velog.io/rss/jun17183
+
 const SELECTOR = {
   title             : 'textarea.jTDuYk',        // 제목
   codeMirrorCode    : 'div.CodeMirror-code',    // 게시글
@@ -12,54 +14,97 @@ const TOKEN_KEY = 'github_token';
 const REPO_URL_KEY = 'repo_url';
 
 // 최하위 텍스트 노드 추출
-const extractText = (element) => {
-  let text = '';
+// const extractText = (element) => {
+//   let text = '';
+//   let lineChangeFlag = false;
+//   let quoteFlag = false;
 
-  const traverse = (node) => {
-    switch (node?.nodeType) {
-      case Node.TEXT_NODE:
-        text += (node?.nodeValue + '   ');
-        break;
-      case Node.ELEMENT_NODE:
-        node?.childNodes.forEach(traverse);
-        break;
+//   const traverse = (node) => {
+//     switch (node?.nodeType) {
+//       case Node.TEXT_NODE:
+//         //const parentNode = node.parentNode;
+        
+//         if (
+//           lineChangeFlag && 
+//           !text &&
+//           node?.nodeValue !== '```'
+//         ) {
+//           text += '<br>';
+//           lineChangeFlag = false;
+//         }
+
+//         if (qutoeFlag && node?.nodeValue[0] !== '>') {
+//           text += '>';
+//         }
+        
+
+
+//         text += node?.nodeValue;
+//         break;
+//       case Node.ELEMENT_NODE:
+//         // presentation = 한 줄 단위
+//         if (node?.getAttribute('role') === 'presentation') {
+//           lineChangeFlag = true;
+//         }
+//         // quote 여부 확인
+//         if (node?.classList.contains('cm-quote')) {
+//           quoteFlag = true;
+//         } else {
+//           if (quoteFlag) text += '\n\n';
+//           quoteFlag = false;
+//         }
+//         node?.childNodes.forEach(traverse);
+//         break;
+//     }
+//   }
+//   traverse(element);
+
+//   return text;
+// };
+
+// // 게시글 본문 => 마크다운
+// const convertCodeToMarkdown = () => {
+//   try {
+//     const title = document.querySelector(SELECTOR.title).value;
+//     if (!title) return { result: 'fail' };
+
+//     let markdownContent = '';
+//     const codeMirrorCode = document.querySelector(SELECTOR.codeMirrorCode);
+//     const codeMirrorLines = codeMirrorCode.querySelectorAll(SELECTOR.codeMirrorLine);
+
+//     codeMirrorLines?.forEach(codeMirrorLine => {
+//       markdownContent += extractText(codeMirrorLine);
+//     });
+
+//     return {
+//       result: 'success',
+//       title: title,
+//       content: markdownContent,
+//     };
+//   } catch (error) {
+//     return {
+//       result: 'error',
+//       title: '',
+//       content: '',
+//       message: error,
+//     }
+//   }
+// };
+
+const observeDetailPage = () => {
+  const observer = new MutationObserver(() => {
+    if (document.readyState === 'complete' && window.location.href.includes('velog.io/@')) {
+      
+      observe.disconnect();
     }
-  }
-  traverse(element);
+  });
+  observer.observe(document, { childList: true, subtree: true });
 
-  return text;
-};
+}
 
-// 게시글 본문 => 마크다운
-const convertCodeToMarkdown = () => {
-  try {
-    const title = document.querySelector(SELECTOR.title).value;
-    if (!title) return { result: 'fail' };
+const pushToGitHub = async () => {
+  
 
-    let markdownContent = '';
-    const codeMirrorCode = document.querySelector(SELECTOR.codeMirrorCode);
-    const codeMirrorLines = codeMirrorCode.querySelectorAll(SELECTOR.codeMirrorLine);
-
-    codeMirrorLines?.forEach(codeMirrorLine => {
-      markdownContent += extractText(codeMirrorLine);
-    });
-
-    return {
-      result: 'success',
-      title: title,
-      content: markdownContent,
-    };
-  } catch (error) {
-    return {
-      result: 'error',
-      title: '',
-      content: '',
-      message: error,
-    }
-  }
-};
-
-const pushToGitHub = () => {
   const data = convertCodeToMarkdown();
 
   if (data.result === 'fail' || !data.content) {
@@ -92,9 +137,6 @@ window.addEventListener('load', () => {
   ) {
     console.log('no event')
     return;
-  } else {
-    console.log('event');
-    console.log(convertCodeToMarkdown());
   }
 
   // 첫번째 등록 버튼이 아닌 두번째 등록 버튼을 눌러야만 실제로 글이 작성된다.
@@ -104,7 +146,7 @@ window.addEventListener('load', () => {
     const observer = new MutationObserver((mutations) => {
       const box = mutations[0].addedNodes[0];
       const secondApplyButton = box.querySelector(SELECTOR.secondApplyButton);
-      const openButton = box.querySelector(SELECTOR.openButton);
+      //const openButton = box.querySelector(SELECTOR.openButton);
 
       if (!secondApplyButton || secondApplyButton?.constructor.name !== 'HTMLButtonElement') {
         console.log('no button');
@@ -113,17 +155,12 @@ window.addEventListener('load', () => {
 
       // 두번째 등록 버튼에 실제 푸시 이벤트 적용
       secondApplyButton.addEventListener('click', () => {
-        if (openButton.classList.contains('hcqYLK')) {
-          console.log('전체공개')
-          pushToGitHub();
-        } else {
-          console.log('비공개')
-        }
+        // 비공개 미적용 상태 (비공개 시에도 푸시가 되는 상황)
+        pushToGitHub();
       });
 
       observer.disconnect();
-    })
-
+    });
     observer.observe(document.body, { childList: true, subtree: true });
   });
 });

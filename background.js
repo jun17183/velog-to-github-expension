@@ -291,6 +291,7 @@ const pushToGitHub = (data, sendResponse) => {
         console.error('Error:', error);
         sendResponse({ status: 'error', message: error.message });
       });
+      
     })
     .catch(error => {
       console.error('Error:', error);
